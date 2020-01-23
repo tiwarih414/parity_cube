@@ -1,8 +1,8 @@
 package com.paritycube.paritycube_assignmernt.home.fragment
 
 
-import android.app.ProgressDialog
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.paritycube.paritycube_assignmernt.R
 import com.paritycube.paritycube_assignmernt.home.adapter.RecylerDataAdapter
 import com.paritycube.paritycube_assignmernt.home.factory.FeaturedDealsViewModelFactory
@@ -27,6 +28,14 @@ class FeaturedFragment : Fragment() {
     lateinit var featuredDealsArrlist: ArrayList<DealsModel.Datum>
 
     var recylerDataAdapter: RecylerDataAdapter? = null
+    lateinit var layoutManager: RecyclerView.LayoutManager
+
+    var pageCount = 1
+    var perPage = 10
+    var isLoading = true
+    var visibleItemCount: Int? = null
+    var totalItemCount: Int? = null
+    var firstVisibleItemPosition = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -51,29 +60,57 @@ class FeaturedFragment : Fragment() {
         })
 
         getFeaturedDeals()
+
+        layoutManager = LinearLayoutManager(activity!!)
+        recycler_featured.layoutManager = layoutManager
+        recycler_featured.addOnScrollListener(recyclerViewOnScrollListner)
     }
 
     private fun getFeaturedDeals() {
         featuredDealsViewModel.getFeaturedDealsRepository()?.observe(this, Observer {
             if (it != null) {
-                featuredDealsArrlist.addAll(it.deals?.data!!)
-                recylerDataAdapter?.notifyDataSetChanged()
+                if (pageCount == 1) {
+                    showFreshList(it)
+                } else {
+                    showAppendedList(it)
+                }
             } else {
-                Toast.makeText(
-                    activity,
-                    resources.getString(R.string.something_went_wrong),
-                    Toast.LENGTH_SHORT
-                ).show()
+                Log.d("Maximum Data", "Reached")
             }
-            setUpRecyclerView(featuredDealsArrlist)
+            progress_bar_feat.visibility = View.GONE
         })
     }
 
-    private fun setUpRecyclerView(featuredDealsArrList: ArrayList<DealsModel.Datum>) {
-        recylerDataAdapter = RecylerDataAdapter(activity!!, featuredDealsArrList)
-        recycler_featured.layoutManager = LinearLayoutManager(activity!!)
+    private fun showFreshList(dealsModel: DealsModel) {
+        featuredDealsArrlist = dealsModel.deals?.data!!
+        recylerDataAdapter = RecylerDataAdapter(activity!!, featuredDealsArrlist)
         recycler_featured.adapter = recylerDataAdapter
+    }
+
+    private fun showAppendedList(dealsModel: DealsModel) {
+        featuredDealsArrlist.addAll(dealsModel.deals?.data!!)
         recylerDataAdapter?.notifyDataSetChanged()
+    }
+
+    private var recyclerViewOnScrollListner = object : RecyclerView.OnScrollListener() {
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            super.onScrolled(recyclerView, dx, dy)
+            if (dy > 0) {
+                visibleItemCount = recyclerView.childCount
+                totalItemCount = layoutManager.itemCount
+                firstVisibleItemPosition =
+                    (recyclerView.layoutManager as LinearLayoutManager?)!!.findFirstVisibleItemPosition()
+
+                if (isLoading) {
+                    if ((visibleItemCount!! + firstVisibleItemPosition) >= totalItemCount!!) {
+                        isLoading = false
+                        pageCount++
+                        featuredDealsViewModel.getFeaturedDeals(perPage, pageCount)
+                        isLoading = true
+                    }
+                }
+            }
+        }
     }
 
 }

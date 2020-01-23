@@ -10,58 +10,57 @@ import retrofit2.Response
 class DealsRepository {
 
     private var restService = RestService()
-    var dealsListData: MutableLiveData<DealsModel> = MutableLiveData()
+    var topDealsListData: MutableLiveData<DealsModel> = MutableLiveData()
+    var popularDealsListData: MutableLiveData<DealsModel> = MutableLiveData()
+    var featuredDealsListData: MutableLiveData<DealsModel> = MutableLiveData()
 
-    fun getTopDeals(perPage: Int, pageCount: Int): MutableLiveData<DealsModel> {
+    fun getTopDeals(perPage: Int, pageCount: Int) {
 
         restService.service?.getTopDeals(perPage, pageCount)
             ?.enqueue(object : Callback<DealsModel> {
                 override fun onResponse(call: Call<DealsModel>, response: Response<DealsModel>) {
                     if (response.isSuccessful) {
-                        dealsListData.value = response.body()
+                        topDealsListData.value = response.body()
                     }
                 }
 
                 override fun onFailure(call: Call<DealsModel>, t: Throwable) {
-                    dealsListData.value = null
+                    topDealsListData.value = null
                 }
 
             })
-        return dealsListData
     }
 
-    fun getPopularDeals(perPage: Int, pageCount: Int): MutableLiveData<DealsModel> {
+    fun getPopularDeals(perPage: Int, pageCount: Int) {
         restService.service?.getPopularDeals(perPage, pageCount)
             ?.enqueue(object : Callback<DealsModel> {
                 override fun onResponse(call: Call<DealsModel>, response: Response<DealsModel>) {
                     if (response.isSuccessful) {
-                        dealsListData.value = response.body()
+                        popularDealsListData.value = response.body()
                     }
                 }
 
                 override fun onFailure(call: Call<DealsModel>, t: Throwable) {
-                    dealsListData.value = null
+                    popularDealsListData.value = null
                 }
 
             })
-        return dealsListData
     }
 
-    fun getFeaturedDeals(perPage: Int, pageCount: Int): MutableLiveData<DealsModel> {
+    fun getFeaturedDeals(perPage: Int, pageCount: Int) {
         restService.service?.getFeaturedDeals(perPage, pageCount)
             ?.enqueue(object : Callback<DealsModel> {
                 override fun onResponse(call: Call<DealsModel>, response: Response<DealsModel>) {
                     if (response.isSuccessful) {
-                        dealsListData.value = response.body()
+                        featuredDealsListData.value = response.body()
                     }
                 }
 
                 override fun onFailure(call: Call<DealsModel>, t: Throwable) {
-                    dealsListData.value = null
+                    featuredDealsListData.value = null
                 }
 
             })
-        return dealsListData
     }
 
 }

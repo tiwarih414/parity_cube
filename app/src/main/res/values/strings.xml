@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ParityCube_Assignmernt</string>
+    <string name="app_name">ParityCube Assignmernt</string>
     <string name="title_activity_home">HomeActivity</string>
     <string name="title_deals">Deals</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -20,6 +20,7 @@
     <string name="something_went_wrong">Something Went Wrong!</string>
 
     <string name="please_wait">Please Wait!</string>
+    <string name="search">Search</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

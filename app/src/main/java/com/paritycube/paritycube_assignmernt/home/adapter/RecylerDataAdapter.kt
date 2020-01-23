@@ -5,6 +5,8 @@ import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Filter
+import android.widget.Filterable
 import androidx.recyclerview.widget.RecyclerView
 import com.paritycube.paritycube_assignmernt.R
 import com.paritycube.paritycube_assignmernt.Util.Util
@@ -16,7 +18,10 @@ class RecylerDataAdapter(
     private val context: Context,
     var list: ArrayList<DealsModel.Datum>
 ) :
-    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    RecyclerView.Adapter<RecyclerView.ViewHolder>(), Filterable {
+
+    private var fRecord: Filter? = null
+    var tempList: ArrayList<DealsModel.Datum> = list
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(context)
@@ -46,5 +51,48 @@ class RecylerDataAdapter(
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         //Nothing
+    }
+
+    override fun getFilter(): Filter {
+        if (fRecord == null) {
+            fRecord = RecordFilter()
+        }
+        return fRecord as Filter
+    }
+
+    inner class RecordFilter : Filter() {
+        override fun performFiltering(charSequence: CharSequence?): FilterResults {
+            val result = FilterResults()
+
+            if (charSequence == null || charSequence.isEmpty()) {
+                /*No Need to Filter*/
+                list = tempList
+                result.values = list
+                result.count = list.size
+
+            } else {
+                val fRecords: ArrayList<DealsModel.Datum> = ArrayList()
+                for (s in list) {
+                    val docnum = s.title.toString()
+                    if (docnum.contains(charSequence.toString().toLowerCase())) {
+                        fRecords.add(s)
+                    }
+                }
+
+                result.values = fRecords
+                result.count = fRecords.size
+
+            }
+
+            return result
+        }
+
+        override fun publishResults(p0: CharSequence?, filterResults: FilterResults?) {
+            if (filterResults != null) {
+                list = filterResults.values as ArrayList<DealsModel.Datum>
+            }
+            notifyDataSetChanged()
+        }
+
     }
 }

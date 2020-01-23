@@ -9,24 +9,22 @@ import com.paritycube.paritycube_assignmernt.Util.Utilities
 import com.paritycube.paritycube_assignmernt.home.model.DealsModel
 import com.paritycube.paritycube_assignmernt.home.repository.DealsRepository
 
-class PopularDealsViewModel(application: Application, perPage: Int, pageCount: Int) : ViewModel() {
+class PopularDealsViewModel(val application: Application, perPage: Int, pageCount: Int) :
+    ViewModel() {
 
     private var popularListData: MutableLiveData<DealsModel>? = null
-    private lateinit var dealsRepository: DealsRepository
+    private var dealsRepository: DealsRepository = DealsRepository()
     var utilities: Utilities = Utilities(application)
     var showError = MutableLiveData<String>()
 
     init {
-        getPopularDeals(application, perPage, pageCount)
+        popularListData = dealsRepository.popularDealsListData
+        getPopularDeals(perPage, pageCount)
     }
 
-    private fun getPopularDeals(application: Application, perPage: Int, pageCount: Int) {
-        if (popularListData != null) {
-            return
-        }
+    fun getPopularDeals(perPage: Int, pageCount: Int) {
         if (utilities.haveNetworkConnection(application)) {
-            dealsRepository = DealsRepository()
-            popularListData = dealsRepository.getPopularDeals(perPage, pageCount)
+            dealsRepository.getPopularDeals(perPage, pageCount)
 
         } else {
             showError.value = application.getString(R.string.no_internet)
